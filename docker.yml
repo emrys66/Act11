@@ -1,0 +1,64 @@
+# docker_setup.yml
+---
+- hosts: localhost
+  become: yes
+  tasks:
+    - name: Install required packages for Debian
+      apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install required packages for RedHat
+      yum:
+        name: 
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Docker from default repositories (Debian)
+      apt:
+        name: docker.io
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker from default repositories (RedHat)
+      yum:
+        name: docker
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install Python pip for Debian
+      apt:
+        name: python3-pip
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Python pip for RedHat
+      yum:
+        name: python3-pip
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Create Dockerfile directory
+      file:
+        path: ~/docker_project
+        state: directory
+
+    - name: Copy HTML files to the control node
+      copy:
+        src: html/
+        dest: ~/docker_project/html/
+
